@@ -24,7 +24,7 @@ config = {}
 config['CLIENT_ID'] = '1b0dc9d3-0a2b-4000-8bd6-90fb6a79be86'
 config['REDIRECT_URI'] = 'http://localhost:8000'
 config['SCOPES'] = ('openid email profile '
-          'urn:globus:auth:scope:transfer.api.globus.org:all')
+                    'urn:globus:auth:scope:transfer.api.globus.org:all')
 config['SERVER_ADDRESS'] = ('127.0.0.1', 8000)
 
 for i in ['CLIENT_ID', 'REDIRECT_URI', 'SCOPES', 'SERVER_ADDRESS']:
@@ -33,11 +33,10 @@ for i in ['CLIENT_ID', 'REDIRECT_URI', 'SCOPES', 'SERVER_ADDRESS']:
     except:
         pass
 
-print(config)
 
-
-def do_native_app_authentication(client_id, redirect_uri,
-                                 requested_scopes=None):
+def do_native_app_authentication(client_id=config['CLIENT_ID'],
+                                 redirect_uri=config['REDIRECT_URI'],
+                                 requested_scopes=config['SCOPES']):
     """
     Does a Native App authentication flow and returns a
     dict of tokens keyed by service name.
@@ -61,11 +60,12 @@ def do_native_app_authentication(client_id, redirect_uri,
     return token_response.by_resource_server
 
 
-def main():
+def get_tokens(client_id=config['CLIENT_ID'],
+               redirect_uri=config['REDIRECT_URI'],
+               requested_scopes=None):
     # start the Native App authentication process
-    tokens = do_native_app_authentication(config['CLIENT_ID'], config['REDIRECT_URI'])
-
-    transfer_token = tokens['transfer.api.globus.org']['access_token']
+    tokens = do_native_app_authentication(config['CLIENT_ID'],
+                                          config['REDIRECT_URI'])
 
     # $HOME/.globus-native-app/<app UUID>/
     path = os.path.expanduser('~/.globus-native-app/'+config['CLIENT_ID'])
@@ -81,9 +81,11 @@ def main():
 
     print('Successfully logged in: tokens are in %s' % path+'/tokens.json')
 
+    return tokens
+
 
 if __name__ == '__main__':
     if not is_remote_session():
-        main()
+        get_tokens()
     else:
         print('This example does not work on a remote session.')
